@@ -1,0 +1,399 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace G8_62752_C02
+
+    // klasa która opisuje dowolny znak, który póżniej można będzie skompresować
+{
+    public class OR_62752_WystępującyZnak
+    {
+        public int or_62752_Ilosc { get; set; }
+        public string or_62752_Znak { get; set; }
+        public string or_62752_BinaryCode { get; set; }
+    }
+
+    // klasa która jest abstrakcyjnym przedstawieniem Kompresji Hoffmana w kodzie
+
+    public class OR_62752_DrzewoHuffmana
+    {
+        public int or_62752_BinaryCode { get; set; }
+        public string or_62752_Znak { get; set; }
+        public string or_62752_Node { get; set; }
+        public int or_62752_Ilosc { get; set; }
+    }
+
+    // klasa opisująca listę znaków po kompresji
+
+    public class OR_62752_HuffmanSourceDictionary
+    {
+        public string or_62752_SingleChar { get; set; }
+        public string or_62752_BinaryCode { get; set; }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+            Console.ReadKey();
+        }
+
+        // funkcja wykonująca kompresje
+
+        public static void or_62752_KompresjaHuffmana(string or_62752_source, ref  List<string>or_62752_resultCode,
+            ref List<OR_62752_WystępującyZnak> or_62752_listaZnaków)
+        {
+
+            // Deklaracja zmiennych
+            string or_62752_pozostaly = or_62752_source;
+            string or_62752_roboczy = or_62752_pozostaly;
+            string or_62752_kolejnyZnak = "";
+            int or_62752_indexListy = 0;
+
+            // Tworzenie ekzemplarów do klasy OR_62752_DrzewoHuffmana 
+            List<OR_62752_DrzewoHuffmana> or_62752_drzewoHUffmana = new List<OR_62752_DrzewoHuffmana>();
+
+            // Tworzenie ekzemplarów do klasy OR_62752_WystępującyZnak 
+            List<OR_62752_WystępującyZnak> or_62752_tymczasowaListaZnakow = new List<OR_62752_WystępującyZnak>();
+
+            // Tworzenie ekzemplarów do klasy OR_62752_DrzewoHuffmana 
+            List<OR_62752_DrzewoHuffmana> or_62752_tymczasoweDrzewoHuffmana = new List<OR_62752_DrzewoHuffmana>();
+
+            // robi split stringu na oddzielne elementy, i po kolei dodaje ich w or_62752_tymczasowaListaZnakow, z celą kolejnego wykorzyzstania  
+            do
+            {
+                // or_62752_roboczy otrzymuje string (albo znaki które się zostali z tego stringa), który był podany jako argument w pole or_62752_source
+                or_62752_roboczy = or_62752_pozostaly;
+
+                // or_62752_kolejnyZnak przyjmuje wartość kolejnego znaku z or_62752_roboczy
+                or_62752_kolejnyZnak = or_62752_roboczy.Substring(0, 1);
+
+                // zwraca index kolejnego znaku, jeśli on spełnia konkretny warunek
+                or_62752_indexListy = or_62752_tymczasowaListaZnakow.FindIndex(or_62752_f => or_62752_f.or_62752_Znak == or_62752_kolejnyZnak);
+
+                // jeśli konkretny znak się powtaża tylko jeden raz robimy następujące dziłania:
+                if (or_62752_indexListy == -1)
+                {
+
+                    // tworzymy ekzemplar nowego znaku
+                    OR_62752_WystępującyZnak or_62752_nowyZnak = new OR_62752_WystępującyZnak();
+
+                    // przepasujemy mu częstotliość powtarzania się (na danym etapie ona jest równa 1)
+                    or_62752_nowyZnak.or_62752_Ilosc = 1;
+
+                    // przepasujemy mu konkretny znak
+                    or_62752_nowyZnak.or_62752_Znak = or_62752_kolejnyZnak;
+
+                    // dodajemy ten znak w or_62752_tymczasowaListaZnakow
+                    or_62752_tymczasowaListaZnakow.Add(or_62752_nowyZnak);
+                }
+                else
+                {
+
+                    // jeśli znak powtarza się więcej niż jeden raz -> liczę go ilość w danym stringu
+                    or_62752_tymczasowaListaZnakow.Where(or_62752_w => or_62752_w.or_62752_Znak ==
+                    or_62752_kolejnyZnak).ToList().ForEach(or_62752_s => or_62752_s.or_62752_Ilosc = or_62752_s.or_62752_Ilosc + 1);
+                }
+
+                // usuwamy znak z stringu
+
+                or_62752_pozostaly = or_62752_roboczy.Remove(0, 1);
+
+                // pętla się skończy swoje działanie wtedy, gdy or_62752_pozostaly nie zawiera już żadnych znaków 
+
+            } while (or_62752_pozostaly.Length != 0);
+
+
+            // Sortujemy znaki zgodnie z częstotliwością ich wytąpieniem (kolunma liczebność z tablicy przedstawianej w Pana prezentacji)
+            or_62752_listaZnaków = or_62752_tymczasowaListaZnakow.OrderBy(or_62752_o => or_62752_o.or_62752_Ilosc).ToList();
+
+
+            List<OR_62752_WystępującyZnak> or_62752_posortowanaListaZnakow = new List<OR_62752_WystępującyZnak>(or_62752_listaZnaków);
+
+            // jest ekwiwalentem węzla w Pana prezentacji
+            int or_62752_nrKorzenia = 0;
+
+            // suma wartości dwóch poprzednich znaków z kolumny liczebność
+            int or_62752_nowyKorzenWartosc = 0;
+
+            string or_62752_nowyKorzen = "node";
+
+
+            do {
+
+                
+                if (or_62752_posortowanaListaZnakow.Count > 1)
+                {
+
+                    if (or_62752_drzewoHUffmana.Count > 0)
+                    {
+
+                        // jeśli suma ilości pierwszych elementów w or_62752_drzewoHUffmana oraz or_62752_posortowanaListaZnakow
+                        // jest większa od sumy pierwszych dwóch elementów z or_62752_posortowanaListaZnakow, to jako
+                        // wartość nowego korzenia będzie suma ilości pierwszych elementów w or_62752_drzewoHUffmana oraz or_62752_posortowanaListaZnakow
+                        // w przeciwnym razie jako wartość będzie występowała suma pierwszych dwóch elementów z kolumny liczebność
+                        if (or_62752_drzewoHUffmana[0].or_62752_Ilosc + or_62752_posortowanaListaZnakow[0].or_62752_Ilosc >
+                            or_62752_posortowanaListaZnakow[0].or_62752_Ilosc + or_62752_posortowanaListaZnakow[1].or_62752_Ilosc)
+                            or_62752_nowyKorzenWartosc = or_62752_drzewoHUffmana[0].or_62752_Ilosc + or_62752_posortowanaListaZnakow[0].or_62752_Ilosc;
+                        else
+                            or_62752_nowyKorzenWartosc = or_62752_posortowanaListaZnakow[0].or_62752_Ilosc + or_62752_posortowanaListaZnakow[1].or_62752_Ilosc;
+                    }
+                    else
+
+                    // jeżeli or_62752_drzewoHUffmana nie zawiera żadnych liści, to wartoścą dla nowego korzenia będzie
+                    // po prostu suma dwóch pierwszych elementów z kolumny liczebność
+                    if (or_62752_drzewoHUffmana.Count == 0)
+                        or_62752_nowyKorzenWartosc = or_62752_posortowanaListaZnakow[0].or_62752_Ilosc + or_62752_posortowanaListaZnakow[1].or_62752_Ilosc;
+
+
+                    if (or_62752_posortowanaListaZnakow.Count > 2)
+                    {
+                        // jeżeli wartość korzenia jest mniejsza lub równa liczebności trzeciego elementa w or_62752_posortowanaListaZnakow
+                        // oraz w tej liście jest nie więcej niż trzy elemety -> do numeru kurzenia się dodaje jedynkę
+                        if (or_62752_nowyKorzenWartosc >= or_62752_posortowanaListaZnakow[2].or_62752_Ilosc && or_62752_posortowanaListaZnakow.Count >= 3)
+                            or_62752_nrKorzenia++;
+                    }
+                    else
+                        or_62752_nrKorzenia++;
+
+                    // tworzymy nowy węzel
+                    OR_62752_WystępującyZnak or_62752_nowyZnak = new OR_62752_WystępującyZnak
+                    {
+                        or_62752_Ilosc = or_62752_nowyKorzenWartosc,
+                        or_62752_Znak = or_62752_nowyKorzen + or_62752_nrKorzenia
+                    };
+
+                    // dodawanie węzla w or_62752_posortowanaListaZnakow
+                    or_62752_posortowanaListaZnakow.Add(or_62752_nowyZnak);
+
+
+                    for (int or_62752_i = 0; or_62752_i <= 1; or_62752_i++)
+                    {
+                        OR_62752_DrzewoHuffmana or_62752_drzewoHuffmanaItem = new OR_62752_DrzewoHuffmana();
+                        if (or_62752_posortowanaListaZnakow.Count > 1)
+                            or_62752_drzewoHuffmanaItem.or_62752_BinaryCode = or_62752_i;
+                        else
+
+                            // przyswojenie n-mu elementu z drzewa Hoffmana nezbędych wartóści, króre są opisane w klasie OR_62752_DrzewoHuffmana
+                            or_62752_drzewoHuffmanaItem.or_62752_BinaryCode = 2;
+                        or_62752_drzewoHuffmanaItem.or_62752_Znak = or_62752_posortowanaListaZnakow[or_62752_i].or_62752_Znak;
+                        or_62752_drzewoHuffmanaItem.or_62752_Node = or_62752_nowyKorzen + or_62752_nrKorzenia.ToString();
+                        or_62752_drzewoHuffmanaItem.or_62752_Ilosc = or_62752_posortowanaListaZnakow[or_62752_i].or_62752_Ilosc;
+
+                        // dodanie do drzewa Huffmana nowego elementa (dodawanie nowych liści)
+                        or_62752_drzewoHUffmana.Add(or_62752_drzewoHuffmanaItem);
+                    }
+
+                    // usuwamy pierwsze dwa elementy z or_62752_posortowanaListaZnakow
+                    or_62752_posortowanaListaZnakow.RemoveRange(0, 2);
+
+                    // sortuje od najmniejszej liczebnosci znaków do największej
+                    or_62752_tymczasowaListaZnakow = or_62752_posortowanaListaZnakow.OrderBy(or_62752_o => or_62752_o.or_62752_Ilosc).ToList();
+
+                    // sortujemy od największej wartości korzenia do najmniejszej
+                    or_62752_tymczasoweDrzewoHuffmana = or_62752_drzewoHUffmana.OrderByDescending(or_62752_o => or_62752_o.or_62752_Ilosc).ToList();
+                    or_62752_drzewoHUffmana = or_62752_tymczasoweDrzewoHuffmana;
+                    or_62752_posortowanaListaZnakow = or_62752_tymczasowaListaZnakow;
+                }
+                else
+                {
+                    // dodajemy górny węzel do or_62752_drzewoHUffmana i czyścimy or_62752_posortowanaListaZnakow
+                    // po tym działaniu wychodzimy z pętli
+                    OR_62752_DrzewoHuffmana or_62752_drzewoHuffmanaItem = new OR_62752_DrzewoHuffmana
+                    {
+                        or_62752_BinaryCode = 2,
+                        or_62752_Znak = or_62752_nowyKorzen + (or_62752_nrKorzenia + 1).ToString(),
+                        or_62752_Node = "TOP"
+                    };
+                    or_62752_drzewoHUffmana.Add(or_62752_drzewoHuffmanaItem);
+                    or_62752_posortowanaListaZnakow.Clear();
+                }
+            }
+
+            // pętla jest wykonywana to tej pory, aż or_62752_posortowanaListaZnakow nie zostanie pusta
+            while (or_62752_posortowanaListaZnakow.Count != 0);
+
+            // zamieniami elemanty w or_62752_drzewoHUffmana na sortowane (od najmniejszego do największego)
+            or_62752_tymczasoweDrzewoHuffmana = or_62752_drzewoHUffmana.OrderBy(or_62752_o => or_62752_o.or_62752_Ilosc).ToList();
+            or_62752_drzewoHUffmana = or_62752_tymczasoweDrzewoHuffmana;
+
+            // tymczasowy kod binarny
+            string or_62752_tempBinaryCode = "";
+
+            // aktualny korzeń
+            string or_62752_actualNode = "";
+
+
+            for (int or_62752_i = 0; or_62752_i < or_62752_drzewoHUffmana.Count - 1; or_62752_i++)
+            {
+
+                // jeśli liczebność i-tego elementa w or_62752_drzewoHUffmana jest równa wartość następnego elementa
+                // i następny element zawiera więcej niz jeden znak, to -> 
+                if (or_62752_drzewoHUffmana[or_62752_i].or_62752_Ilosc ==
+                    or_62752_drzewoHUffmana[or_62752_i + 1].or_62752_Ilosc && or_62752_drzewoHUffmana[or_62752_i + 1].or_62752_Znak.Length > 1)
+                {
+                    // tworzymy tymczsowy ekzemplarz OR_62752_DrzewoHuffmana
+                    OR_62752_DrzewoHuffmana or_62752_tymczasowy = new OR_62752_DrzewoHuffmana();
+
+                    // przyswajamy mu i-ty element z listy or_62752_drzewoHUffmana
+                    or_62752_tymczasowy = or_62752_drzewoHUffmana[or_62752_i];
+
+                    // przyswajamy i-tej wartości z or_62752_drzewoHUffmana, następną wartość
+                    or_62752_drzewoHUffmana[or_62752_i] = or_62752_drzewoHUffmana[or_62752_i + 1];
+
+                    // następnej wartość przyswajamy i-ty element
+                    or_62752_drzewoHUffmana[or_62752_i + 1] = or_62752_tymczasowy;
+
+                    // przyswajamy kod binarny dla obu wartości
+                    or_62752_drzewoHUffmana[or_62752_i].or_62752_BinaryCode = 0;
+                    or_62752_drzewoHUffmana[or_62752_i + 1].or_62752_BinaryCode = 1;
+                }
+            }
+
+            // idzemy cyklem po lisćie zawierającej liczebności każdego znaku, dopóki i-ty element nie będzie >= ilości znaków w tej liście
+            for (int or_62752_i = 0; or_62752_i < or_62752_listaZnaków.Count; or_62752_i++)
+            {
+
+                // bierzemy nowy znak z listy
+                or_62752_kolejnyZnak = or_62752_listaZnaków[or_62752_i].or_62752_Znak;
+
+                // otrymujemy index elementa a listy
+                or_62752_indexListy = or_62752_drzewoHUffmana.FindIndex(or_62752_f => or_62752_f.or_62752_Znak == or_62752_actualNode);
+
+                // otrzymujemy aktualny korzeń, na któm w danym momencie jesteśmy
+                or_62752_actualNode = or_62752_drzewoHUffmana[or_62752_indexListy].or_62752_Node;
+
+                // otrzymujemy tymczasowy kod binarny kolejnego elementa w drzewie Huffmana
+                or_62752_tempBinaryCode = or_62752_drzewoHUffmana[or_62752_indexListy].or_62752_BinaryCode.ToString();
+                do
+                {
+                    // otrymujemy index elementa a listy
+                    or_62752_indexListy = or_62752_drzewoHUffmana.FindIndex(or_62752_f => or_62752_f.or_62752_Znak == or_62752_actualNode);
+
+                    // jeśli list jeście zawiera jakieś elementy to ->
+                    if (or_62752_indexListy != -1)
+                    {
+
+                        // otrzymujemy aktualny korzeń, na któm w danym momencie jesteśmy
+                        or_62752_actualNode = or_62752_drzewoHUffmana[or_62752_indexListy].or_62752_Node;
+
+                        // liczymy wartość kodu binarnego dla podanego elementa
+                        or_62752_tempBinaryCode = or_62752_tempBinaryCode +
+                            or_62752_drzewoHUffmana[or_62752_indexListy].or_62752_BinaryCode.ToString();
+
+                        // jeśli długość kodu binarnego jest większa niż 1 i go pierwszy element == 0, to ->
+                        if (or_62752_tempBinaryCode.Length > 1 && or_62752_tempBinaryCode.Substring(0, 1) == "0")
+
+                            // usuwamy pierwsy element
+                            or_62752_tempBinaryCode = or_62752_tempBinaryCode.Remove(0, 1);
+                    }
+                }
+
+                // pętla skończy swoje działanie kiedy w or_62752_drzewoHUffmana nie zostanie już elementów
+                while (or_62752_indexListy != -1);
+
+                // w końcu cykłu przyswajamy końcowy binarny kod i-temu elementowi z listy znaków
+                or_62752_listaZnaków[or_62752_i].or_62752_BinaryCode = or_62752_tempBinaryCode;
+
+            }
+
+            // cykł jet wynywany dopóki or_62752_i jest mniejsza ilości symboli w or_62752_source
+            for (int or_62752_i = 0; or_62752_i < or_62752_source.Length; or_62752_i++)
+            {
+
+                // otrzymyjemy kolejny element od pozycji or_62752_i
+                or_62752_kolejnyZnak = or_62752_source.Substring(or_62752_i, 1);
+
+                // wykonujemy cykł dopóki or_62752_j nie jest większa od ilości znaków w liście znaków
+                for (int or_62752_j = 0; or_62752_j <= or_62752_listaZnaków.Count; or_62752_j++)
+                {
+
+                    // jeżeli j-ty znak z or_62752_listaZnaków jest równy i-mu znakowi z or_62752_source, to ->
+                    if (or_62752_listaZnaków[or_62752_j].or_62752_Znak == or_62752_kolejnyZnak)
+                    {
+
+                        // dodajemy w liste or_62752_resultCode, kod binarny tego znaku
+                        or_62752_resultCode.Add(or_62752_listaZnaków[or_62752_j].or_62752_BinaryCode + "");
+
+                        // kończy działanie cukłu, ponieważ znależliśmy kod binarny, i nie musimy dalej wykonywać działanie
+                        or_62752_j = or_62752_listaZnaków.Count;
+                    }
+                }
+            }
+        }
+
+        // funkcja odpowiadająca za dekompresje kompresowanego stringa
+
+        public static void OR_62752_DekompresjaHuffmana(List<OR_62752_HuffmanSourceDictionary> or_62752_sourceDictionary, string or_62752_source,
+            ref List<string> or_62752_resultCode, ref bool or_62752_dictionaryComplete)
+        {
+
+            // deklacja zmiennych
+            string or_62752_kolejnyZnak = "";
+            int or_62752_zawiera = 0;
+
+            // probujemy wykonać następujące działanie, w przeciwnym przypadku opracujemy błąd
+            // i dla or_62752_dictionaryComplete przyswoimy znaczenie false, co będzie znaczyło
+            // że or_62752_source nie został dekompresowany 
+            try
+            {
+                do
+                {
+                    do
+                    {
+
+                        // jeżeli or_62752_source spełi warunek z if, to or_62752_source przyswajamy or_62752_source minus pierszy element
+                        if (or_62752_source.Length > 0 && or_62752_source.Substring(0, 1) != "0" &&
+                            or_62752_source.Substring(0, 1) != "1")
+                        {
+                            or_62752_source = or_62752_source.Remove(0, 1);
+                        }
+                    }
+
+                    // wyjdziemy z pętli gdy or_62752_source będzie większy od 0, go pierwszy element != 0 i go drugi element != 1
+                    while (or_62752_source.Length > 0 && or_62752_source.Substring(0, 1) != "0" && or_62752_source.Substring(0, 1) != "1");
+
+                    if (or_62752_source.Length > 0)
+                    {
+                        do
+                        {
+
+                            // przyswajamy or_62752_kolejnyZnak znaczenie następnego elementu z or_62752_source
+                            or_62752_kolejnyZnak = or_62752_kolejnyZnak + or_62752_source.Substring(0, 1);
+                            // usuwamy już wykorzystany element z or_62752_source
+                            or_62752_source = or_62752_source.Remove(0, 1);
+                        }
+
+                        // wyjdziemy z pętli gdy pierwszy element w or_62752_source będzie równy 0 lub 1
+                        while (or_62752_source.Substring(0, 1) == "0" ||
+                            or_62752_source.Substring(0, 1) == "1");
+
+                        // index znaku
+                        or_62752_zawiera = or_62752_sourceDictionary.FindIndex(or_62752_f => or_62752_f.or_62752_BinaryCode == or_62752_kolejnyZnak);
+
+                        // dodajemy w list result elementy z or_62752_sourceDictionary
+                        or_62752_resultCode.Add(or_62752_sourceDictionary[or_62752_zawiera].or_62752_SingleChar);
+
+                        // wracam or_62752_kolejnyZnak do pierwszowzóra
+                        or_62752_kolejnyZnak = "";
+                    }
+                    else
+                    {
+
+                        // po dekompresji wszystkich znaków, funkcja kończy swoje działanie a argumentowi or_62752_dictionaryComplete = true
+                        or_62752_dictionaryComplete = true;
+                        return;
+                    }
+
+                    // wyjdziemy z pętli kiedy or_62752_source będzie pusty
+                }
+                while (or_62752_source.Length > 0);
+            }
+            catch (Exception ex)
+            {
+                or_62752_dictionaryComplete = false;
+            }
+        }
+    }
+}
